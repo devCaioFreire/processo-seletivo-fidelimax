@@ -2,7 +2,7 @@ interface IStarProps {
   stars: boolean;
 }
 
-export const Star = ({ stars }: IStarProps) => {
+export const StarInactive = () => {
   return (
     <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
       <mask id="path-1-inside-1_1_537" fill="white">

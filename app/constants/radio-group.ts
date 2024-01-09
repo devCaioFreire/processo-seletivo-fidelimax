@@ -1,4 +1,4 @@
-export const RadioGroup = [
+export const RadioGroupConst = [
   {
     id: '1',
     label: '1'

@@ -1,13 +1,47 @@
-import { Star } from "@/app/svg/star";
-import { RadioGroup } from "@/app/constants/radio-group";
+'use client'
 import { CheckboxGroup } from "@/app/constants/checkbox-group";
+import { Stars } from "@/app/components/stars";
+import { useEffect, useState } from "react";
+import { RadioGroup } from "@/app/components/radio-group";
+import { RadioGroupConst } from "@/app/constants/radio-group";
+import axios from "axios";
+import { CheckBadge } from "./check-badge";
+import { Spinner } from "@nextui-org/react";
+
+interface APIProps {
+  typeQuestion: number;
+  answerValue: number;
+  mandatory: boolean;
+  content: string;
+  itens?: undefined;
+  horizontal?: undefined;
+}
 
 const Content = () => {
-  const value = 0;
+  const [data, setData] = useState<APIProps | any>(null);
 
-  const stars = Array.from({ length: 5 }, (_, index) => (
-    <Star key={index} stars={index < value} />
-  ));
+  useEffect(() => {
+    const fetchSurveyData = async () => {
+      try {
+        const apiUrl = "https://fdlmx-backgrounds.sfo3.digitaloceanspaces.com/front-test/survey.json";
+        const response = await axios.get(apiUrl);
+        setData(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching survey data:', error);
+      }
+    };
+
+    fetchSurveyData();
+  }, []);
+
+  if (!data) {
+    return (
+      <div className="absolute left-1/2">
+        <Spinner size="lg" color="warning" className="-mt-4" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col items-center justify-center -mt-[calc(316px-128px)] pb-8">
@@ -18,123 +52,146 @@ const Content = () => {
 
         <div className="flex items-center justify-center">
           <main className="w-[648px] p-8 bg-white rounded-2xl">
-
             <div className="space-y-[9px]">
               <h2 className="font-semibold text-2xl leading-[30px] text-blue-400">
-                Título da pergunta deve ficar aqui
+                Questões de estrela
               </h2>
               <p className="text-sm leading-[21px]">
-                Também é importante ter um espaço para o dono da loja colocar uma descrição da pergunta para ajudar o entendimento do usuário
+                {data && data.itens[0].content}
               </p>
             </div>
 
-            <div className="flex pt-4 pb-10">{stars}</div>
+            <div className="flex pt-4 pb-10">
+              <Stars initialValue={data && data.itens[0].answerValue} />
+            </div>
 
             <div className="space-y-[9px]">
               <h2 className="font-semibold text-2xl leading-[30px] text-blue-400">
-                Título da pergunta deve ficar aqui
+                Questões que tem os rádios fixos de 1 até 10
               </h2>
               <p className="text-sm leading-[21px]">
-                Também é importante ter um espaço para o dono da loja colocar uma descrição da pergunta para ajudar o entendimento do usuário
+                {data && data.itens[1].content}
               </p>
             </div>
 
             <div className="flex pt-4 w-full justify-between">
-              {RadioGroup.map((item) => (
-                <div className="flex flex-col items-center gap-2">
-                  <input
-                    name="rating"
-                    type="radio"
-                    id={item.id}
-                    value={item.id}
-                    className="w-4 h-4"
-                  />
-                  <label>{item.label}</label>
-                </div>
-              ))}
+              <RadioGroup
+                options={RadioGroupConst}
+                initialValue={data && data.itens[1].answerValue}
+                name="rating" />
             </div>
 
             <div className="space-y-[9px] py-10">
               <h2 className="text-blue-800">
-                Descreva o motivo de sua avaliação <span className="text-sm text-gray-600 font-medium">(opcional)</span>
+                {data && data.itens[2].content} <span className="text-sm text-gray-600 font-medium">(opcional)</span>
               </h2>
               <textarea
                 placeholder="Digite aqui..."
-                className="h-[104px] w-full p-4 border border-blue-50 rounded-lg resize-none outline-none text-blue-400"
+                className="h-[104px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
               />
             </div>
 
-            <select className="h-[56px] w-full p-4 border border-blue-50 rounded-lg outline-none text-blue-400">
+            <select className="h-[56px] w-full p-4 border border-gray-200 rounded-lg outline-none text-blue-400">
               <option
                 value=""
                 disabled
                 selected
                 className="text-gray-600"
               >
-                Qual loja você frequenta?
+                {data && data.itens[3].content}
               </option>
-              <option value="opcao1">Opção 1</option>
-              <option value="opcao2">Opção 2</option>
-              <option value="opcao3">Opção 3</option>
+              <option
+                value={data && data.itens[3].itens[0].value}>
+                {data && data.itens[3].itens[0].description}
+              </option>
+              <option
+                value={data && data.itens[3].itens[1].value}>
+                {data && data.itens[3].itens[1].description}
+              </option>
+              <option
+                value={data && data.itens[3].itens[2].value}>
+                {data && data.itens[3].itens[2].description}
+              </option>
             </select>
 
             <div className="pt-10 text-blue-800">
-              <h2>Pergunta de escolha única?</h2>
+              <h2>{data && data.itens[4].content}</h2>
               <div className="space-x-4 pt-2">
-                <input type="radio" name="singleChoice" value={'yes'} />
-                <label>Sim</label>
-                <input type="radio" name="singleChoice" value={'no'} />
-                <label>Não</label>
+                <input
+                  type="radio"
+                  name="singleChoice"
+                  value={data && data.itens[4].itens[0].value}
+                  checked={data && data.itens[4].answerValue === data.itens[4].itens[0].value}
+                />
+                <label>{data && data.itens[4].itens[0].description}</label>
+
+                <input
+                  type="radio"
+                  name="singleChoice"
+                  value={data && data.itens[4].itens[1].value}
+                  checked={data && data.itens[4].answerValue === data.itens[4].itens[1].value}
+                />
+                <label>{data && data.itens[4].itens[1].description}</label>
               </div>
             </div>
 
             <div className="pt-10 text-blue-800">
-              <h2>Pergunta de múltipla escolha?</h2>
-              <div className="space-x-4 pt-2 flex">
-                terminar depois
+              <h2>Questões de seleção múltipla</h2>
+              <div className={`${data && data.itens[5].horizontal ? 'flex gap-4' : 'flex flex-col gap-2'} pt-2`}>
+                {data && data.itens[5].itens.map((item: any, index: any) => (
+                  <CheckBadge
+                    key={index}
+                    value={item.value}
+                    description={item.description}
+                    horizontal={data && data.itens[5].horizontal}
+                  />
+                ))}
               </div>
             </div>
 
             <div className="pt-10 text-blue-800">
-              <h2>Pergunta de múltipla escolha?</h2>
-              {CheckboxGroup.map((item) => (
-                <div className="flex gap-2">
-                  <input type="checkbox" id={item.id} />
-                  <label className="text-sm">{item.label}</label>
+              <h2>Questões de seleção múltipla</h2>
+              {data && data.itens[6].itens.map((item: any, index: any) => (
+                <div
+                  key={index}
+                  className="flex items-center pt-2 gap-2">
+                  <input type="checkbox" id={item.value} />
+                  <label className="text-sm">{item.description}</label>
                 </div>
               ))}
             </div>
 
             <div className="py-10 space-y-2">
               <h2 className="text-blue-800">
-                Pergunta de texto?
+                Questões de texto
               </h2>
               <textarea
                 placeholder="Digite aqui..."
-                className="h-[168px] w-full p-4 border border-blue-50 rounded-lg resize-none outline-none text-blue-400"
+                className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
               />
             </div>
 
             <div className="space-y-2 pb-10">
               <h2 className="text-blue-800">
-                Pergunta de texto?
+                Questões de texto
               </h2>
               <textarea
                 placeholder="Digite aqui..."
-                className="h-[168px] w-full p-4 border border-blue-50 rounded-lg resize-none outline-none text-blue-400"
+                className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
               />
             </div>
 
-            <div className="flex flex-col gap-4">
-              <button className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800">Enviar Fake Pos</button>
-              <button className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800">Enviar Erro</button>
-              <button className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800">Enviar Sucesso</button>
-            </div>
+            <button className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800">Enviar</button>
 
+            <div className="flex gap-4 pt-10">
+              <button className="bg-yellow text-base rounded-full py-[10px] px-8 font-bold text-blue-800 shadow-md">Enviar Fake Pos</button>
+              <button className="bg-[#FC4737] text-base rounded-full py-[10px] px-8 font-bold text-blue-800 shadow-md">Enviar Erro</button>
+              <button className="bg-[#04D361] text-base rounded-full py-[10px] px-8 font-bold text-blue-800 shadow-md">Enviar Sucesso</button>
+            </div>
           </main>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
 
