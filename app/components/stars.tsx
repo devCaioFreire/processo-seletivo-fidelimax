@@ -5,9 +5,10 @@ import { StarInactive } from "@/app/svg/star-inactive";
 
 interface StarsProps {
   initialValue?: number;
+  onStarsChange?: (stars: number) => void;
 }
 
-export const Stars = ({ initialValue = 0 }: StarsProps) => {
+export const Stars = ({ initialValue = 0, onStarsChange }: StarsProps) => {
   const [value, setValue] = useState(initialValue);
   const [hoverValue, setHoverValue] = useState(-1);
 
@@ -20,7 +21,12 @@ export const Stars = ({ initialValue = 0 }: StarsProps) => {
   };
 
   const handleClick = (index: number) => {
-    setValue(index + 1);
+    const newValue = index + 1;
+    setValue(newValue);
+    if (onStarsChange) {
+      onStarsChange(newValue);
+      console.log(newValue)
+    }
   };
 
   const stars = Array.from({ length: 5 }, (_, index) => (

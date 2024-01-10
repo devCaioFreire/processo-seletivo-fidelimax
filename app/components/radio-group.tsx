@@ -4,19 +4,26 @@ interface RadioGroupProps {
   options?: { id: string; label: string }[];
   initialValue: number;
   name: string;
+  onRadioChange?: (value: string) => void;
 }
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
   initialValue,
   name,
+  onRadioChange
 }) => {
   const [selectedValue, setSelectedValue] = useState<number | undefined>(
     initialValue
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedValue(Number(event.target.value));
+    const value = event.target.value;
+    setSelectedValue(Number(value));
+    if (onRadioChange) {
+      onRadioChange(value);
+      console.log(value)
+    }
   };
 
   return (

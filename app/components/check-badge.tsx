@@ -1,16 +1,17 @@
 import { useState } from "react";
 
 interface CheckBadgeProps {
-  value: any
+  value: any;
   description: string;
-  horizontal: boolean
+  horizontal: boolean;
+  selected: boolean;
+  onChange: (value: any, selected: boolean) => void;
 }
 
-export const CheckBadge = ({ value, description, horizontal }: CheckBadgeProps) => {
-  const [selected, setSelected] = useState(false);
+export const CheckBadge = ({ value, description, horizontal, selected, onChange }: CheckBadgeProps) => {
 
   const handleClick = () => {
-    setSelected(!selected);
+    onChange(value, !selected);
   };
 
   return (
