@@ -17,7 +17,6 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedValue(Number(event.target.value));
-    alert(selectedValue)
   };
 
   return (

@@ -1,6 +1,7 @@
 import { MenuIcon } from "@/app/svg/menu-icon";
 import { Logo } from "@/app/svg/logo";
 import User from "@/app/components/user";
+import DropdownUser from "./dropdown-user";
 
 const Navbar = () => {
   return (
@@ -12,7 +13,9 @@ const Navbar = () => {
       </div>
 
       <div className="text-white">
-        <User />
+        <DropdownUser>
+          <User />
+        </DropdownUser>
       </div>
     </nav>
   )

@@ -26,6 +26,11 @@ const config: Config = {
         'yellow': '#FFB800'
       }
     },
+    screens: {
+      sm: '320px',
+      '2sm': '418px',
+      md: '768px',
+    }
   },
   darkMode: "class",
   plugins: [nextui()]

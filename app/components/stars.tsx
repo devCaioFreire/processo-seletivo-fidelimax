@@ -39,5 +39,5 @@ export const Stars = ({ initialValue = 0 }: StarsProps) => {
     </div>
   ));
 
-  return <div className="flex">{stars}</div>
+  return <div className="sm:grid sm:grid-cols-5 sm:gap-11 md:flex">{stars}</div>
 };
