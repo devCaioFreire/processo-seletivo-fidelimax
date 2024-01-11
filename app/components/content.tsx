@@ -8,31 +8,10 @@ import { CheckBadge } from "@/app/components/check-badge";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { ModalSubmit } from "./modal";
-
-interface APIProps {
-  typeQuestion: number;
-  answerValue: number;
-  mandatory: boolean;
-  content: string;
-  itens?: undefined;
-  horizontal?: undefined;
-}
-
-interface FormType {
-  stars: number;
-  radio: number;
-  review: string;
-  select: any;
-  singleChoice: any;
-  multipleChoiceBadge: number[];
-  multipleChoiceCheckbox: number[];
-  textQuestion1: string;
-  textQuestion2: string;
-  [key: string]: any;
-}
+import { APIProps, FormType, FormularioObjeto, ItensProps } from "../models/api-form";
 
 const Content = () => {
-  const [data, setData] = useState<APIProps | any>(null);
+  const [data, setData] = useState<FormularioObjeto | null>(null);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [multipleChoiceCheckboxSelected, setMultipleChoiceCheckboxSelected] = useState<number[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -41,19 +20,20 @@ const Content = () => {
     const fetchSurveyData = async () => {
       try {
         const apiUrl = "https://fdlmx-backgrounds.sfo3.digitaloceanspaces.com/front-test/survey.json";
-        const response = await axios.get(apiUrl);
-        setData(response.data);
-        setFormValues({
-          stars: response.data?.itens[0]?.answerValue ?? 0,
-          radio: response.data?.itens[1]?.answerValue ?? "",
-          review: "",
-          select: "",
-          singleChoice: response.data?.itens[4]?.answerValue ?? 0,
-          multipleChoiceBadge: selectedItems,
-          multipleChoiceCheckbox: multipleChoiceCheckboxSelected,
-          textQuestion1: "",
-          textQuestion2: "",
+        const response = await axios.get<APIProps>(apiUrl);
+        const itens: ItensProps[] = response.data.itens!;
+        setData({
+          stars: itens[0],
+          radio: itens[1],
+          review: itens[2],
+          select: itens[3],
+          singleChoice: itens[4],
+          multipleChoiceBadge: itens[5],
+          multipleChoiceCheckbox: itens[6],
+          textQuestion1: itens[7],
+          textQuestion2: itens[7],
         });
+
         console.log(response.data);
       } catch (error) {
         console.error('Error fetching survey data:', error);
@@ -62,25 +42,16 @@ const Content = () => {
 
     fetchSurveyData();
   }, []);
-
-  const [formValues, setFormValues] = useState<FormType>({
-    stars: data && data.itens[0].answerValue,
-    radio: data && data.itens[1].answerValue,
-    review: "",
-    select: "",
-    singleChoice: data && data.itens[4].answerValue,
-    multipleChoiceBadge: selectedItems,
-    multipleChoiceCheckbox: multipleChoiceCheckboxSelected,
-    textQuestion1: "",
-    textQuestion2: "",
-  });
+  const [formValues, setFormValues] = useState<FormType | undefined>(undefined)
 
   const updateForm = (formData: Partial<FormType>) => {
-    const datavalue = formValues;
+    const datavalue = data;
     Object.keys(formData).forEach((key: string) => {
-      datavalue[key] = formData[key]
+      datavalue![key].answerValue = formData[key]
+      console.log(formData);
     })
-    setFormValues(datavalue);
+
+    setData(datavalue);
   }
 
   const handleCheckBadgeChange = (value: number, selected: any) => {
@@ -104,7 +75,8 @@ const Content = () => {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsOpenModal(true);
-    console.log('Resposta:', formValues);
+    console.log('Resposta:', data);
+
   }
 
   async function handleSubmitFake() {
@@ -112,15 +84,15 @@ const Content = () => {
       updateForm({ multipleChoiceBadge: (selectedItems ?? []), multipleChoiceCheckbox: (multipleChoiceCheckboxSelected ?? []) })
 
       const data =
-        formValues.stars !== 0 &&
-        formValues.radio !== null &&
-        formValues.review !== "" &&
-        formValues.select !== null &&
-        formValues.singleChoice !== undefined &&
-        formValues.multipleChoiceBadge.length > 0 &&
-        formValues.multipleChoiceCheckbox.length > 0 &&
-        formValues.textQuestion1 !== "" &&
-        formValues.textQuestion2 !== "";
+        formValues!.stars !== 0 &&
+        formValues!.radio !== null &&
+        formValues!.review !== "" &&
+        formValues!.select !== null &&
+        formValues!.singleChoice !== undefined &&
+        formValues!.multipleChoiceBadge.length > 0 &&
+        formValues!.multipleChoiceCheckbox.length > 0 &&
+        formValues!.textQuestion1 !== "" &&
+        formValues!.textQuestion2 !== "";
 
       if (data) {
         console.log("Formulário válido, enviando dados:", formValues);
@@ -185,13 +157,13 @@ const Content = () => {
                     Questões de estrela
                   </h2>
                   <p className="text-sm leading-[21px]">
-                    {data && data.itens[0].content}
+                    { }
                   </p>
                 </div>
 
                 <div className="pt-4 pb-10 sm:grid sm:grid-cols-2 md:flex">
                   <Stars
-                    initialValue={data && data.itens[0].answerValue}
+                    initialValue={Number(data!.stars.answerValue)}
                     onStarsChange={(data) => updateForm({ stars: data })} />
                 </div>
               </section>
@@ -203,14 +175,14 @@ const Content = () => {
                     Questões que tem os rádios fixos de 1 até 10
                   </h2>
                   <p className="text-sm leading-[21px]">
-                    {data && data.itens[1].content}
+                    {data!.radio.content}
                   </p>
                 </div>
 
                 <div className="flex pt-4 w-full justify-between">
                   <RadioGroup
                     options={RadioGroupConst}
-                    initialValue={data && data.itens[1].answerValue}
+                    initialValue={Number(data!.radio.answerValue)}
                     name="rating"
                     onRadioChange={(data) => { updateForm({ radio: Number(data) }) }} />
                 </div>
@@ -220,7 +192,7 @@ const Content = () => {
               <section>
                 <div className="space-y-[9px] py-10">
                   <h2 className="text-blue-800">
-                    {data && data.itens[2].content} <span className="text-sm text-gray-600 font-medium">(opcional)</span>
+                    {data!.review.content} <span className="text-sm text-gray-600 font-medium">(opcional)</span>
                   </h2>
                   <textarea
                     placeholder="Digite aqui..."
@@ -232,12 +204,12 @@ const Content = () => {
 
               {/* Select */}
               <Select
-                label={data && data.itens[3].content}
-                value={formValues.select}
+                label={data!.select.content}
+                value={data.select.answerValue}
                 onChange={(data) => { updateForm({ select: Number(data.target.value) }) }}
                 className="w-full border border-gray-200 rounded-lg"
               >
-                {data && data.itens[3].itens.map((item: any) => (
+                {data!.select.itens.map((item: any) => (
                   <SelectItem key={item.value} value={item.value}>
                     {item.description}
                   </SelectItem>
@@ -247,25 +219,25 @@ const Content = () => {
               {/*  Single Choice*/}
               <section>
                 <div className="pt-10 text-blue-800">
-                  <h2>{data && data.itens[4].content}</h2>
+                  <h2>{data!.singleChoice.content}</h2>
                   <div className="space-x-4 pt-2">
                     <input
                       type="radio"
                       name="singleChoice"
-                      value={data && data.itens[4].itens[0].value}
-                      checked={formValues.singleChoice || data && data.itens[4].answerValue === (data && data.itens[4].itens[0].value)}
-                      onChange={(data) => { updateForm({ singleChoice: data }) }}
+                      value={data!.singleChoice.itens[0].value}
+                      checked={data!.singleChoice.answerValue === data!.singleChoice.itens[0].value}
+                      onChange={(e) => setData({ ...data, singleChoice: { ...data.singleChoice, answerValue: data.singleChoice.itens[0].value } })}
                     />
-                    <label>{data && data.itens[4].itens[0].description}</label>
+                    <label>{data!.singleChoice.itens[0].description}</label>
 
                     <input
                       type="radio"
                       name="singleChoice"
-                      value={data && data.itens[4].itens[1].value}
-                      checked={formValues.singleChoice || data && data.itens[4].answerValue === (data && data.itens[4].itens[1].value)}
-                      onChange={(data) => { updateForm({ singleChoice: data }) }}
+                      value={data!.singleChoice.itens[1].value}
+                      checked={data!.singleChoice.answerValue === data!.singleChoice.itens[1].value}
+                      onChange={(e) => setData({ ...data, singleChoice: { ...data.singleChoice, answerValue: data.singleChoice.itens[1].value } })}
                     />
-                    <label>{data && data.itens[4].itens[1].description}</label>
+                    <label>{data!.singleChoice.itens[1].description}</label>
                   </div>
                 </div>
               </section>
@@ -274,15 +246,15 @@ const Content = () => {
               <section>
                 <div className="pt-10 text-blue-800">
                   <h2>Questões de seleção múltipla</h2>
-                  <div className={`${data && data.itens[5].horizontal ? 'sm:grid sm:grid-cols-2 md:flex gap-4' : 'flex flex-col gap-2'} pt-2`}>
-                    {data && data.itens[5].itens.map((item: any, index: any) => (
+                  <div className={`${data!.multipleChoiceBadge.horizontal ? 'sm:grid sm:grid-cols-2 md:flex gap-4' : 'flex flex-col gap-2'} pt-2`}>
+                    {data!.multipleChoiceBadge.itens.map((item: any, index: any) => (
                       <CheckBadge
                         key={index}
                         value={item.value}
                         description={item.description}
-                        horizontal={data && data.itens[5].horizontal}
+                        horizontal={(data!.multipleChoiceBadge.horizontal ?? true)}
                         selected={selectedItems.includes(item.value)}
-                        onChange={handleCheckBadgeChange}
+                        onChange={(e) => { updateForm({ multipleChoiceBadge: e }) }}
                       />
                     ))}
                   </div>
@@ -294,7 +266,7 @@ const Content = () => {
                 <div className="pt-10 text-blue-800">
                   <h2>Questões de seleção múltipla</h2>
                   {data &&
-                    data.itens[6].itens.map((item: any, index: any) => (
+                    data.multipleChoiceCheckbox.itens.map((item: any, index: any) => (
                       <div key={index} className="flex items-center pt-2 gap-2">
                         <input
                           type="checkbox"
@@ -316,7 +288,8 @@ const Content = () => {
                     Questões de texto
                   </h2>
                   <textarea
-                    onChange={(data) => { updateForm({ textQuestion1: data.target.value }) }}
+                    value={data.textQuestion1.answerValue}
+                    onChange={(e) => { setData({ ...data, textQuestion1: { ...data.textQuestion1, answerValue: e.target.value } }) }}
                     placeholder="Digite aqui..."
                     className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
                   />
@@ -330,7 +303,8 @@ const Content = () => {
                     Questões de texto
                   </h2>
                   <textarea
-                    onChange={(data) => { updateForm({ textQuestion2: data.target.value }) }}
+                    value={data.textQuestion2.answerValue}
+                    onChange={(e) => { setData({ ...data, textQuestion2: { ...data.textQuestion2, answerValue: e.target.value } }) }}
                     placeholder="Digite aqui..."
                     className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
                   />
@@ -364,16 +338,16 @@ const Content = () => {
       </div>
       <ModalSubmit
         isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
-        stars={formValues.stars}
-        radio={formValues.radio}
-        review={formValues.review}
-        select={formValues.select}
-        singleChoice={formValues.singleChoice}
-        badge={selectedItems}
-        checkbox={multipleChoiceCheckboxSelected}
-        text1={formValues.textQuestion1}
-        text2={formValues.textQuestion2}
+        onClose={() => { setIsOpenModal(false), console.log(data) }}
+        stars={Number(data!.stars.answerValue)}
+        radio={Number(data!.radio.answerValue)}
+        review={String(data!.review.answerValue)}
+        select={String(data!.select.answerValue)}
+        singleChoice={Number(data!.singleChoice.answerValue)}
+        badge={data.multipleChoiceBadge.answerValue}
+        checkbox={data.multipleChoiceCheckbox.answerValue}
+        text1={String(data!.textQuestion1.answerValue)}
+        text2={String(data!.textQuestion2.answerValue)}
       />
     </div>
   )

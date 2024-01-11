@@ -69,11 +69,8 @@ export const ModalSubmit = (props: ModalProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
                 <Button color="primary" onPress={onClose}>
-                  Action
+                  Fechar
                 </Button>
               </ModalFooter>
             </>
