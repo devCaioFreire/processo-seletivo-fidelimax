@@ -7,6 +7,7 @@ import axios from "axios";
 import { CheckBadge } from "@/app/components/check-badge";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import toast from "react-hot-toast";
+import { ModalSubmit } from "./modal";
 
 interface APIProps {
   typeQuestion: number;
@@ -17,10 +18,24 @@ interface APIProps {
   horizontal?: undefined;
 }
 
+interface FormType {
+  stars: number;
+  radio: number;
+  review: string;
+  select: any;
+  singleChoice: any;
+  multipleChoiceBadge: number[];
+  multipleChoiceCheckbox: number[];
+  textQuestion1: string;
+  textQuestion2: string;
+  [key: string]: any;
+}
+
 const Content = () => {
   const [data, setData] = useState<APIProps | any>(null);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [multipleChoiceCheckboxSelected, setMultipleChoiceCheckboxSelected] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [multipleChoiceCheckboxSelected, setMultipleChoiceCheckboxSelected] = useState<number[]>([]);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   useEffect(() => {
     const fetchSurveyData = async () => {
@@ -47,19 +62,8 @@ const Content = () => {
 
     fetchSurveyData();
   }, []);
-  interface form {
-    stars: any,
-    radio: any,
-    review: any,
-    select: any,
-    singleChoice: any,
-    multipleChoiceBadge: any,
-    multipleChoiceCheckbox: any,
-    textQuestion1: any,
-    textQuestion2: any,
-    [key: string]: any,
-  }
-  const [formValues, setFormValues] = useState<form>({
+
+  const [formValues, setFormValues] = useState<FormType>({
     stars: data && data.itens[0].answerValue,
     radio: data && data.itens[1].answerValue,
     review: "",
@@ -71,7 +75,7 @@ const Content = () => {
     textQuestion2: "",
   });
 
-  const updateForm = (formData: Partial<form>) => {
+  const updateForm = (formData: Partial<FormType>) => {
     const datavalue = formValues;
     Object.keys(formData).forEach((key: string) => {
       datavalue[key] = formData[key]
@@ -79,48 +83,7 @@ const Content = () => {
     setFormValues(datavalue);
   }
 
-  // const handleStarsChange = (stars: number) => {
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     stars,
-  //   }));
-  // };
-
-  // const handleRadioChange = (value: string) => {
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     radio: value,
-  //   }));
-  // };
-
-  // const handleReviewChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   const value = event.target.value;
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     review: value,
-  //   }));
-  //   console.log(value)
-  // };
-
-  // const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const value = event.target.value;
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     select: value,
-  //   }));
-  //   console.log(value)
-  // };
-
-  // const handleSingleChoiceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = Number(event.target.value);
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     singleChoice: value,
-  //   }));
-  //   console.log(value)
-  // };
-
-  const handleCheckBadgeChange = (value: string, selected: any) => {
+  const handleCheckBadgeChange = (value: number, selected: any) => {
     setSelectedItems((prevSelectedItems) =>
       selected
         ? [...prevSelectedItems, value]
@@ -138,46 +101,37 @@ const Content = () => {
     }
   };
 
-  // const handletextQuestion1Change = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   const value = event.target.value;
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     textQuestion1: value,
-  //   }));
-  //   console.log(value)
-  // };
-
-  // const handletextQuestion2Change = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   const value = event.target.value;
-  //   setFormValues((prevFormValues) => ({
-  //     ...prevFormValues,
-  //     textQuestion2: value,
-  //   }));
-  //   console.log(value)
-  // };
-
-  async function handleSubmitFake(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsOpenModal(true);
+    console.log('Resposta:', formValues);
+  }
 
-    updateForm({ multipleChoiceBadge: (selectedItems ?? []), multipleChoiceCheckbox: (multipleChoiceCheckboxSelected ?? []) })
+  async function handleSubmitFake() {
+    try {
+      updateForm({ multipleChoiceBadge: (selectedItems ?? []), multipleChoiceCheckbox: (multipleChoiceCheckboxSelected ?? []) })
 
-    const data =
-      formValues.stars !== 0 &&
-      formValues.radio !== "" &&
-      formValues.review !== "" &&
-      formValues.select !== "" &&
-      formValues.singleChoice !== undefined &&
-      formValues.multipleChoiceBadge.length > 0 &&
-      formValues.multipleChoiceCheckbox.length > 0 &&
-      formValues.textQuestion1 !== "" &&
-      formValues.textQuestion2 !== "";
+      const data =
+        formValues.stars !== 0 &&
+        formValues.radio !== null &&
+        formValues.review !== "" &&
+        formValues.select !== null &&
+        formValues.singleChoice !== undefined &&
+        formValues.multipleChoiceBadge.length > 0 &&
+        formValues.multipleChoiceCheckbox.length > 0 &&
+        formValues.textQuestion1 !== "" &&
+        formValues.textQuestion2 !== "";
 
-    if (data) {
-      console.log("Formulário válido, enviando dados:", formValues);
-      toast.success('Formulário enviado com sucesso');
-    } else {
-      console.log("Formulário inválido, verifique os campos.");
-      toast.error('Houve um erro ao enviar o formulário');
+      if (data) {
+        console.log("Formulário válido, enviando dados:", formValues);
+        toast.success('Formulário enviado com sucesso');
+      } else {
+        console.log("Formulário inválido, verifique os campos.");
+        toast.error('Houve um erro ao enviar o formulário');
+      }
+    } catch (error) {
+      console.error('Ocorreu um erro ao processar o formulário:', error);
+      toast.error('Ocorreu um erro ao processar o formulário');
     }
   }
 
@@ -188,7 +142,6 @@ const Content = () => {
       toast.error(response.data.error)
       console.log(response.data.error);
     } catch (error) {
-      toast.error('Houve um erro ao enviar o formulário');
       console.error('Error GET on Submit Error:', error);
     }
   }
@@ -200,6 +153,7 @@ const Content = () => {
       toast.success('Formulário enviado com sucesso')
       console.log(response.data);
     } catch (error) {
+      toast.error(String(error))
       console.error('Error GET on Submit Error:', error);
     }
   }
@@ -222,7 +176,7 @@ const Content = () => {
 
         <div className="flex items-center justify-center">
           <main className="p-8 bg-white rounded-2xl sm:w-[300px] 2sm:w-[400px] md:w-[648px]">
-            <form onSubmit={handleSubmitFake}>
+            <form onSubmit={handleSubmit}>
 
               {/* Stars */}
               <section>
@@ -258,7 +212,7 @@ const Content = () => {
                     options={RadioGroupConst}
                     initialValue={data && data.itens[1].answerValue}
                     name="rating"
-                    onRadioChange={(data) => { updateForm({ radio: data }) }} />
+                    onRadioChange={(data) => { updateForm({ radio: Number(data) }) }} />
                 </div>
               </section>
 
@@ -384,12 +338,13 @@ const Content = () => {
               </section>
 
               {/* Submit Button */}
-              <button className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800 hover:bg-opacity-85">
+              <button type="submit" className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800 hover:bg-opacity-85">
                 Enviar
               </button>
 
               <div className="sm:grid sm:grid-rows-3 md:flex gap-4 pt-10">
                 <button
+                  onClick={handleSubmitFake}
                   className="bg-yellow text-base rounded-full py-[10px] px-8 font-bold text-blue-800 shadow-md">
                   Enviar Fake Pos
                 </button>
@@ -406,8 +361,21 @@ const Content = () => {
             </form>
           </main>
         </div>
-      </div >
-    </div >
+      </div>
+      <ModalSubmit
+        isOpen={isOpenModal}
+        onClose={() => setIsOpenModal(false)}
+        stars={formValues.stars}
+        radio={formValues.radio}
+        review={formValues.review}
+        select={formValues.select}
+        singleChoice={formValues.singleChoice}
+        badge={selectedItems}
+        checkbox={multipleChoiceCheckboxSelected}
+        text1={formValues.textQuestion1}
+        text2={formValues.textQuestion2}
+      />
+    </div>
   )
 }
 
