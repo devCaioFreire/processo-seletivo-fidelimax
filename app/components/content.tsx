@@ -101,20 +101,21 @@ const Content = () => {
 
   async function handleSubmitFake() {
     try {
-      const jsonResponse: any[] = [];
-      Object.keys(formResponse!).forEach((key) => {
-        jsonResponse.push({ [key]: formResponse![key] })
+      const response: any[] = [];
+      Object.keys(formData!).forEach((key) => {
+        const field = formData![key];
+        if (field.mandatory && field.typeQuestion !== 5 && !formResponse![key]) {
+          throw new Error(`O campo ${field.content} é obrigatório.`);
+        } else if (field.mandatory && field.typeQuestion === 5 && formResponse![key] === undefined) {
+          throw new Error(`O campo ${field.content} é obrigatório.`);
+        }
+        response.push({ [key]: formResponse![key] });
       });
-      if (jsonResponse) {
-        console.log("Formulário válido, enviando dados:", jsonResponse);
-        toast.success('Formulário enviado com sucesso');
-      } else {
-        console.log("Formulário inválido, verifique os campos.");
-        toast.error('Houve um erro ao enviar o formulário');
-      }
-    } catch (error) {
+      console.log('ASLKDAPKOD', response);
+      toast.success('Formulário enviado com sucesso');
+    } catch (error: any) {
       console.error('Ocorreu um erro ao processar o formulário:', error);
-      toast.error('Ocorreu um erro ao processar o formulário');
+      toast.error(error.message);
     }
   }
 
@@ -163,7 +164,6 @@ const Content = () => {
     });
   };
 
-
   const handleCheckBadgeChange = (value: string, checked: boolean) => {
     if (checked) {
       setSelectedItems((prevSelectedItems) => [...prevSelectedItems, value]);
@@ -203,7 +203,6 @@ const Content = () => {
                         onRadioChange={(data) => { updateForm({ radio: Number(data) }) }}
                       />;
                     case 3:
-                      console.log('FormResponse Value:', formData[key]?.answerValue);
                       return (
                         <React.Fragment>
                           {formData[key]?.answerValue === undefined ? (
