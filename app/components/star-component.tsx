@@ -5,7 +5,7 @@ import { StarInactive } from "@/app/svg/star-inactive";
 import { ComponentsProps } from "../models/components";
 
 export const StarComponent = ({ initialValue = 0, updateForm }: ComponentsProps) => {
-  const [value, setValue] = useState<number>(initialValue);
+  const [value, setValue] = useState<number>(Number(initialValue));
   const [hoverValue, setHoverValue] = useState(-1);
 
   const handleMouseOver = (index: number) => {
@@ -17,8 +17,8 @@ export const StarComponent = ({ initialValue = 0, updateForm }: ComponentsProps)
   };
 
   const handleStarsChange = (newValue: number) => {
-    setValue(newValue);
-    updateForm!({ stars: newValue });
+    setValue(newValue + 1);
+    updateForm!({ stars: newValue + 1 });
   };
 
   const stars = Array.from({ length: 5 }, (_, index) => (
