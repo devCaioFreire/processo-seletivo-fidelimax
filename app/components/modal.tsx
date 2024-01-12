@@ -5,15 +5,15 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Divid
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  stars: number;
-  radio: number;
-  review: string;
-  select: string;
-  singleChoice: number;
-  badge: any;
-  checkbox: any;
-  text1: string;
-  text2: string;
+  stars?: number;
+  radio?: number;
+  review?: string;
+  select?: string;
+  singleChoice?: number;
+  badge?: any[];
+  checkbox?: any;
+  text1?: string;
+  text2?: string;
 }
 
 export const ModalSubmit = (props: ModalProps) => {

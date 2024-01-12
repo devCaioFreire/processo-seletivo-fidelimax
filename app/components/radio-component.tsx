@@ -1,11 +1,6 @@
 import { RadioGroupConst } from "../constants/radio-group";
+import { ComponentsProps } from "../models/components";
 import { RadioGroup } from "./radio-group";
-
-interface RadioProps {
-  content: string;
-  initialValue: number;
-  onRadioChange: (stars: number) => void;
-}
 
 export const RadioComponent = ({ content, initialValue, onRadioChange }: ComponentsProps) => {
   return (
@@ -24,7 +19,7 @@ export const RadioComponent = ({ content, initialValue, onRadioChange }: Compone
           options={RadioGroupConst}
           initialValue={initialValue!}
           name="rating"
-          onRadioChange={() => onRadioChange} />
+          onRadioChange={(value) => onRadioChange!(Number(value))} />
       </div>
     </section>
   )

@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { StarActive } from "@/app/svg/star-active";
 import { StarInactive } from "@/app/svg/star-inactive";
+import { ComponentsProps } from "../models/components";
 
-export const StarComponent = ({ initialValue = 0, onStarsChange }: ComponentsProps) => {
-  const [value, setValue] = useState(initialValue);
+export const StarComponent = ({ initialValue = 0, updateForm }: ComponentsProps) => {
+  const [value, setValue] = useState<number>(initialValue);
   const [hoverValue, setHoverValue] = useState(-1);
 
   const handleMouseOver = (index: number) => {
@@ -15,13 +16,9 @@ export const StarComponent = ({ initialValue = 0, onStarsChange }: ComponentsPro
     setHoverValue(-1);
   };
 
-  const handleClick = (index: number) => {
-    const newValue = index + 1;
+  const handleStarsChange = (newValue: number) => {
     setValue(newValue);
-    if (onStarsChange) {
-      onStarsChange(newValue);
-      console.log(newValue)
-    }
+    updateForm!({ stars: newValue });
   };
 
   const stars = Array.from({ length: 5 }, (_, index) => (
@@ -29,7 +26,7 @@ export const StarComponent = ({ initialValue = 0, onStarsChange }: ComponentsPro
       key={index}
       onMouseOver={() => handleMouseOver(index)}
       onMouseLeave={handleMouseLeave}
-      onClick={() => handleClick(index)}
+      onClick={() => handleStarsChange(index)}
       className="transition-all cursor-pointer"
     >
       {hoverValue > index || value > index ? (

@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 interface CheckBadgeProps {
-  value: any;
+  value: string;
   description: string;
   horizontal: boolean;
   selected: boolean;
-  onChange: (value: any, selected: boolean) => void;
+  onChange: (value: string, selected: boolean) => void;
 }
 
 export const CheckBadge = ({ value, description, horizontal, selected, onChange }: CheckBadgeProps) => {
