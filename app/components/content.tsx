@@ -9,6 +9,14 @@ import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { ModalSubmit } from "./modal";
 import { APIProps, FormType, FormularioObjeto, ItensProps } from "../models/api-form";
+import { StarComponent } from "./star-component";
+import { RadioComponent } from "./radio-component";
+import { ReviewComponent } from "./review-component";
+import { SelectComponent } from "./select-component";
+import { SingleChoiceComponent } from "./single-choice-component";
+import { Badge } from "./badge";
+import { TextComponent } from "./text-component";
+import { CheckboxComponent } from "./checkbox-component";
 
 const Content = () => {
   const [data, setData] = useState<FormularioObjeto | null>(null);
@@ -75,8 +83,10 @@ const Content = () => {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsOpenModal(true);
-    console.log('Resposta:', data);
 
+    setData({ ...data, multipleChoiceBadge: { ...data?.multipleChoiceBadge, itens: selectedItems } })
+
+    console.log('Resposta:', data);
   }
 
   async function handleSubmitFake() {
@@ -139,6 +149,12 @@ const Content = () => {
     )
   }
 
+  const getSelectedBadges = () => {
+    return data?.multipleChoiceBadge.itens
+      .filter((item) => selectedItems.includes(item.value))
+      .map((item) => item.value);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center -mt-[calc(316px-128px)] pb-8 sm:px-4 md:px-0">
       <div className="max-w-[792px]">
@@ -151,73 +167,97 @@ const Content = () => {
             <form onSubmit={handleSubmit}>
 
               {/* Stars */}
-              <section>
-                <div className="space-y-[9px]">
-                  <h2 className="font-semibold text-2xl leading-[30px] text-blue-400">
-                    Questões de estrela
-                  </h2>
-                  <p className="text-sm leading-[21px]">
-                    { }
-                  </p>
-                </div>
+              {Object.keys(data).map((key) => {
+                const typeQuestion = data[key]?.typeQuestion;
+                if (typeQuestion !== undefined) {
+                  switch (typeQuestion) {
+                    case 1:
+                      return <StarComponent
+                        key={key}
+                        initialValue={data[key].answerValue}
+                      />;
+                    case 2:
+                      return <RadioComponent
+                        key={key}
+                        content={data[key].content}
+                        initialValue={data[key].answerValue}
+                        onRadioChange={(data) => { updateForm({ radio: Number(data) }) }}
+                      />;
+                    case 3:
+                      if (data[key].answerValue) {
+                        return <TextComponent
+                          key={key}
+                          initialValue={data[key].answerValue}
+                          onChange={(e) => { setData({ ...data, textQuestion1: { ...data.textQuestion1, answerValue: e.target.value } }) }} />
+                      } else {
+                        return <ReviewComponent
+                          key={key}
+                          content={data[key].content}
+                          initialValue={data[key].answerValue}
+                          onChange={(data) => updateForm({ review: data.target.value })}
+                        />;
+                      }
+                    case 4:
+                      return <SelectComponent
+                        key={key}
+                        content={data[key].content}
+                        initialValue={data[key].answerValue}
+                        onChange={(data) => updateForm({ review: data.target.value })}
+                        data={data[key].itens}
+                      />;
+                    case 5:
+                      return <SingleChoiceComponent
+                        key={key}
+                        content={data[key].content}
+                        initialValue={data[key].answerValue}
+                        onChange={(data) => updateForm({ review: data.target.value })}
+                        checked={data!.singleChoice.answerValue === data!.singleChoice.itens[0].value}
+                        label1={data!.singleChoice.itens[0].description}
+                        label2={data!.singleChoice.itens[1].description}
+                      />;
+                    case 6:
+                      if (data[key].horizontal) {
+                        return <Badge
+                          key={key}
+                          data={data[key].itens}
+                          horizontal
+                          onChange={() => handleCheckBadgeChange}
+                        />
+                      } else {
+                        return <CheckboxComponent
+                          key={key}
+                          data={data[key].itens}
+                          onChange={() => handleCheckBadgeChange}
+                        />
+                      }
+                    default:
+                      return null;
+                  }
+                }
+                return null;
+              })}
 
-                <div className="pt-4 pb-10 sm:grid sm:grid-cols-2 md:flex">
-                  <Stars
-                    initialValue={Number(data!.stars.answerValue)}
-                    onStarsChange={(data) => updateForm({ stars: data })} />
+              {/* Multiple Choice Badge */}
+              {/* <section>
+                <div className="pt-10 text-blue-800">
+                  <h2>Questões de seleção múltipla</h2>
+                  <div className={`${data!.multipleChoiceBadge.horizontal ? 'sm:grid sm:grid-cols-2 md:flex gap-4' : 'flex flex-col gap-2'} pt-2`}>
+                    {data!.multipleChoiceBadge.itens.map((item: any, index: any) => (
+                      <CheckBadge
+                        key={index}
+                        value={item.value}
+                        description={item.description}
+                        horizontal={(data!.multipleChoiceBadge.horizontal ?? true)}
+                        selected={selectedItems.includes(item.value)}
+                        onChange={handleCheckBadgeChange}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </section>
-
-              {/* Radio */}
-              <section>
-                <div className="space-y-[9px]">
-                  <h2 className="font-semibold text-2xl leading-[30px] text-blue-400">
-                    Questões que tem os rádios fixos de 1 até 10
-                  </h2>
-                  <p className="text-sm leading-[21px]">
-                    {data!.radio.content}
-                  </p>
-                </div>
-
-                <div className="flex pt-4 w-full justify-between">
-                  <RadioGroup
-                    options={RadioGroupConst}
-                    initialValue={Number(data!.radio.answerValue)}
-                    name="rating"
-                    onRadioChange={(data) => { updateForm({ radio: Number(data) }) }} />
-                </div>
-              </section>
-
-              {/* Review */}
-              <section>
-                <div className="space-y-[9px] py-10">
-                  <h2 className="text-blue-800">
-                    {data!.review.content} <span className="text-sm text-gray-600 font-medium">(opcional)</span>
-                  </h2>
-                  <textarea
-                    placeholder="Digite aqui..."
-                    className="h-[104px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
-                    onChange={(data) => updateForm({ review: data.target.value })}
-                  />
-                </div>
-              </section>
-
-              {/* Select */}
-              <Select
-                label={data!.select.content}
-                value={data.select.answerValue}
-                onChange={(data) => { updateForm({ select: Number(data.target.value) }) }}
-                className="w-full border border-gray-200 rounded-lg"
-              >
-                {data!.select.itens.map((item: any) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.description}
-                  </SelectItem>
-                ))}
-              </Select>
+              </section> */}
 
               {/*  Single Choice*/}
-              <section>
+              {/* <section>
                 <div className="pt-10 text-blue-800">
                   <h2>{data!.singleChoice.content}</h2>
                   <div className="space-x-4 pt-2">
@@ -240,29 +280,11 @@ const Content = () => {
                     <label>{data!.singleChoice.itens[1].description}</label>
                   </div>
                 </div>
-              </section>
+              </section> */}
 
-              {/* Multiple Choice Badge */}
-              <section>
-                <div className="pt-10 text-blue-800">
-                  <h2>Questões de seleção múltipla</h2>
-                  <div className={`${data!.multipleChoiceBadge.horizontal ? 'sm:grid sm:grid-cols-2 md:flex gap-4' : 'flex flex-col gap-2'} pt-2`}>
-                    {data!.multipleChoiceBadge.itens.map((item: any, index: any) => (
-                      <CheckBadge
-                        key={index}
-                        value={item.value}
-                        description={item.description}
-                        horizontal={(data!.multipleChoiceBadge.horizontal ?? true)}
-                        selected={selectedItems.includes(item.value)}
-                        onChange={(e) => { updateForm({ multipleChoiceBadge: e }) }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
 
               {/* Multiple Choice Checkbox */}
-              <section>
+              {/* <section>
                 <div className="pt-10 text-blue-800">
                   <h2>Questões de seleção múltipla</h2>
                   {data &&
@@ -273,16 +295,21 @@ const Content = () => {
                           id={item.value}
                           value={item.value}
                           checked={multipleChoiceCheckboxSelected.includes(item.value)}
-                          onChange={(e) => handleCheckboxChange(item.value, e.target.checked)}
+                          onChange={(e) => {
+                            setSelectedItems([e.target.checked
+                              ? selectedItems.filter((item: number) => item !== e.target.value)
+                              : [...selectedItems, e.target.value]
+                            ]);
+                          }}
                         />
                         <label className="text-sm">{item.description}</label>
                       </div>
                     ))}
                 </div>
-              </section>
+              </section> */}
 
               {/* Text Question 1 */}
-              <section>
+              {/* <section>
                 <div className="py-10 space-y-2">
                   <h2 className="text-blue-800">
                     Questões de texto
@@ -294,22 +321,7 @@ const Content = () => {
                     className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
                   />
                 </div>
-              </section>
-
-              {/* Text Question 2 */}
-              <section>
-                <div className="space-y-2 pb-10">
-                  <h2 className="text-blue-800">
-                    Questões de texto
-                  </h2>
-                  <textarea
-                    value={data.textQuestion2.answerValue}
-                    onChange={(e) => { setData({ ...data, textQuestion2: { ...data.textQuestion2, answerValue: e.target.value } }) }}
-                    placeholder="Digite aqui..."
-                    className="h-[168px] w-full p-4 border border-gray-200 rounded-lg resize-none outline-none text-blue-400"
-                  />
-                </div>
-              </section>
+              </section> */}
 
               {/* Submit Button */}
               <button type="submit" className="bg-yellow text-lg rounded-full py-[10px] px-16 font-bold text-blue-800 hover:bg-opacity-85">
@@ -344,7 +356,7 @@ const Content = () => {
         review={String(data!.review.answerValue)}
         select={String(data!.select.answerValue)}
         singleChoice={Number(data!.singleChoice.answerValue)}
-        badge={data.multipleChoiceBadge.answerValue}
+        badge={getSelectedBadges()}
         checkbox={data.multipleChoiceCheckbox.answerValue}
         text1={String(data!.textQuestion1.answerValue)}
         text2={String(data!.textQuestion2.answerValue)}

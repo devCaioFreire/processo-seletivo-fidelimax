@@ -4,6 +4,7 @@ export interface ItensInsideItensProps {
 }
 
 export interface ItensProps {
+  [key: string]: any;
   typeQuestion: number;
   answerValue: any;
   mandatory: boolean;
