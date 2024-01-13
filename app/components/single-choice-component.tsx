@@ -9,10 +9,10 @@ export const SingleChoiceComponent = ({
   label1,
   label2,
 }: ComponentsProps) => {
-  const [selectedValue, setSelectedValue] = useState<number | undefined>(initialValue);
+  const [selectedValue, setSelectedValue] = useState<number | undefined>(Number(initialValue));
 
   useEffect(() => {
-    setSelectedValue(initialValue);
+    setSelectedValue(Number(initialValue));
   }, [initialValue]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
