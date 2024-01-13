@@ -17,7 +17,7 @@ export const RadioComponent = ({ content, initialValue, onRadioChange }: Compone
       <div className="flex pt-4 w-full justify-between">
         <RadioGroup
           options={RadioGroupConst}
-          initialValue={initialValue!}
+          initialValue={Number(initialValue!)}
           name="rating"
           onRadioChange={(value) => onRadioChange!(Number(value))} />
       </div>
