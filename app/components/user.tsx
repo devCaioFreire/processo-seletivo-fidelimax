@@ -1,5 +1,4 @@
 import { ArrowUser } from "@/app/svg/arrow-user";
-import { Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
 
 const User = () => {
   return (
