@@ -66,6 +66,30 @@ const Content = () => {
     console.log('USE', formResponse)
   }, [formData]);
 
+  const handleTextChange = (key: string, newValue: string) => {
+    setFormData(prevFormData => {
+      if (!prevFormData) return null;
+      return {
+        ...prevFormData,
+        [key]: {
+          ...prevFormData[key],
+          answerValue: newValue
+        }
+      };
+    });
+  };
+
+  const handleCheckBadgeChange = (value: string, checked: boolean) => {
+    if (checked) {
+      setSelectedItems((prevSelectedItems) => [...prevSelectedItems, value]);
+    } else {
+      setSelectedItems((prevSelectedItems) =>
+        prevSelectedItems.filter((item) => item !== value)
+      );
+    }
+  };
+
+
   const updateForm = (newResponse: Partial<FormResponse>) => {
     //Pega o valor das repostas Atuais 
     const response = formResponse;
@@ -127,6 +151,8 @@ const Content = () => {
       console.log(response.data.error);
     } catch (error) {
       console.error('Error GET on Submit Error:', error);
+    } finally {
+      setIsOpenModal(false);
     }
   }
 
@@ -139,6 +165,8 @@ const Content = () => {
     } catch (error) {
       toast.error(String(error))
       console.error('Error GET on Submit Error:', error);
+    } finally {
+      setIsOpenModal(false);
     }
   }
 
@@ -150,29 +178,6 @@ const Content = () => {
       </div>
     )
   }
-
-  const handleTextChange = (key: string, newValue: string) => {
-    setFormData(prevFormData => {
-      if (!prevFormData) return null;
-      return {
-        ...prevFormData,
-        [key]: {
-          ...prevFormData[key],
-          answerValue: newValue
-        }
-      };
-    });
-  };
-
-  const handleCheckBadgeChange = (value: string, checked: boolean) => {
-    if (checked) {
-      setSelectedItems((prevSelectedItems) => [...prevSelectedItems, value]);
-    } else {
-      setSelectedItems((prevSelectedItems) =>
-        prevSelectedItems.filter((item) => item !== value)
-      );
-    }
-  };
 
   return (
     <div className="flex flex-col items-center justify-center -mt-[calc(316px-128px)] pb-8 sm:px-4 md:px-0">
